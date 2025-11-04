@@ -1,3 +1,6 @@
-checkpoints/
-data/
-MNIST/
+*.pt
+*.pkl
+models/
+*.zip
+__pycache__/
+.env
