@@ -2,9 +2,34 @@ import streamlit as st
 import torch
 import torch.nn.functional as F
 import pickle
+import os
+import requests
+import zipfile
+from pathlib import Path
 
 st.set_page_config(page_title="Next-Word Predictor", layout="wide")
 st.title("Next-Word Prediction using MLP")
+
+# AUTO-DOWNLOAD MODELS IF NOT PRESENT
+@st.cache_resource
+def ensure_models_exist():
+    """Download models from release if not present locally"""
+    if not os.path.exists('model_cat1_low_epochs.pt'):
+        try:
+            st.info("Downloading model weights (first run only)...")
+            url = "https://github.com/lucifer4073/ES335_Assignment_3/releases/download/v1.0-q1/q1_models.zip"
+            response = requests.get(url, timeout=60)
+            with open('q1_models.zip', 'wb') as f:
+                f.write(response.content)
+            with zipfile.ZipFile('q1_models.zip', 'r') as z:
+                z.extractall()
+            os.remove('q1_models.zip')
+            st.success("Models downloaded!")
+        except Exception as e:
+            st.error(f"Failed to download: {e}")
+
+# Call this first
+ensure_models_exist()
 
 SEQUENCE_LENGTH = 5
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
